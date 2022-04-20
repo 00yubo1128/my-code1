@@ -1,3 +1,6 @@
+############# 定义了一个PascalVOC类，里面包含了之后会用到的许多函数，如计算评估指标等 #################
+
+
 import numpy as np
 import pandas as pd
 import xmltodict
@@ -19,9 +22,9 @@ class PascalVOC(object):
         'person', 'bird', 'cat', 'cow', 'dog', 'horse', 'sheep',
         'aeroplane', 'bicycle', 'boat', 'bus', 'car', 'motorbike', 'train',
         'bottle', 'chair', 'diningtable', 'pottedplant', 'sofa', 'tvmonitor'
-    ]
+    ] #PASCAL VOC2012数据集中的类别
     label2idx = {lbl: idx for idx, lbl in enumerate(labels)}
-    idx2label = {idx: lbl for idx, lbl in enumerate(labels)}
+    idx2label = {idx: lbl for idx, lbl in enumerate(labels)} #映射
     img_size = (224, 224)
 
     def __init__(self, voc_dir):
@@ -39,7 +42,8 @@ class PascalVOC(object):
         self.trainset, self.testset = self._load()
         self.mb_idx = 0
         self.mb_test_idx=0
-        
+     
+    #返回小批量训练集数据及相应标签
     def next_image_minibatch(self, size, random=True, reset=False):
         X = self.trainset
 
@@ -57,6 +61,7 @@ class PascalVOC(object):
 
         return self.load_images(mb), self.load_annotations(mb)
     
+    #返回测试集小批量数据及标签
     def next_test_image_minibatch(self, size, random=True, reset=False):
         X = self.testset
 
@@ -89,20 +94,24 @@ class PascalVOC(object):
         y_seg = self.load_segmentation_label()
 
         return X_img, X, y, y_seg
-
+    
+    #根据图像名字读取图像数据并resize为224x224大小
     def load_images(self, img_names):
         X = [transform.resize(io.imread(self._img_path(img)), self.img_size) for img in img_names[0]]
 
         return np.array(X)
-
+    
+    #根据图像名字读取标签数据
     def load_annotations(self, img_names):
         y = [np.column_stack(self.get_class_bbox(img)) for img in img_names[0]]
 
         return np.array(y)
-
+    
+    #加载已保存的测试集分割标签
     def load_segmentation_label(self):
         return np.load(self.label_dir + 'labels_segmentation.npy')
-
+    
+    #根据图像名字读取测试集的分割标签
     def load_segmentation_label_from_imgs(self, img_names):
         def preprocess(img_name):
             img = io.imread(self.segmentation_dir + '/' + img_name + '.png')
@@ -115,6 +124,7 @@ class PascalVOC(object):
 
         return np.array(y)
 
+    #在原始图像上画出边界框
     def draw_bbox(self, img, bbox, color=[1, 0, 0], line_width=3):
         xmin, ymin, xmax, ymax = bbox
         h, w = img.shape[:2]
@@ -132,7 +142,8 @@ class PascalVOC(object):
         img_bbox[ymin-line_width:ymax+line_width, xmax:xmax+line_width] = color
 
         return img_bbox
-
+    
+    # 根据图像名字读取其真实标签数据：类别和边框
     def get_class_bbox(self, img_name):
         with open(self._label_path(img_name), 'r') as f:
             xml = xmltodict.parse(f.read())
@@ -170,32 +181,29 @@ class PascalVOC(object):
 
     def load_features_testset(self):
         return self._load_features(self.testset_name)
-
+    
+    #计算分割准确率的函数
     def segmentation_accuracy(self, y_pred, y_true):
         return np.mean(y_pred == y_true)
 
+    #计算分割精度的函数
     def segmentation_precision(self, y_pred, y_true):
         tp = np.sum(y_true & y_pred)
         fp = np.sum(~y_true & y_pred)
         return tp / (tp + fp + 1e-8)
-
+    
+    #计算分割召回率的函数
     def segmentation_recall(self, y_pred, y_true):
         tp = np.sum(y_true & y_pred)
         fn = np.sum(y_true & ~y_pred)
         return tp / (tp + fn + 1e-8)
 
+    #返回分割精度、召回率和F1分数
     def segmentation_prec_rec_f1(self, y_pred, y_true):
         p = self.segmentation_precision(y_pred, y_true)
         r = self.segmentation_recall(y_pred, y_true)
         f1 = 2 * p * r / (p + r + 1e-8)
         return p, r, f1
-    
-    def Dice(self,y_pred,y_true):
-        tp = np.sum(y_true & y_pred)
-        fp = np.sum(~y_true & y_pred)
-        fn = np.sum(y_true & ~y_pred)
-        Dice=(2*tp)/(2*tp+fp+fn)
-        return Dice
     
     def _load_features(self, dataset_name):
         dataset_name = dataset_name.split('.')[0]
