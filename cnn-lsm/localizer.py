@@ -1,3 +1,6 @@
+######### 编写了CNN网络模型的架构 ############ 
+
+
 from keras.applications.resnet50 import ResNet50
 from keras.models import Model, load_model
 from keras.layers import Input, Dense, Dropout, Activation, Flatten
@@ -26,11 +29,11 @@ def smooth_l1(x):
 
     return x
 
-
-def reg_loss(y_true, y_pred):
+#定义回归分支上的损失函数
+def reg_loss(y_true, y_pred):  
     return smooth_l1(y_true - y_pred)
 
-
+#定义学习率调节器
 def scheduler(epoch):
     if 0 <= epoch < 20:
         return 1e-3
@@ -43,7 +46,7 @@ def scheduler(epoch):
 
     return 1e-6
 
-
+#定义一个类用于搭建CNN网络的架构
 class Localizer(object):
 
     custom_objs = {'reg_loss': reg_loss}
@@ -69,7 +72,8 @@ class Localizer(object):
 
             # Joint model
             self.model = Model(input=inputs, output=[cls_head, reg_head])
-
+    
+    #定义模型的训练函数
     def train(self, X, y, optimizer='adam', nb_epoch=160):
         self.model.compile(optimizer='adam',
                            loss={'cls': 'categorical_crossentropy', 'reg': reg_loss},
@@ -85,10 +89,12 @@ class Localizer(object):
 
         with open('./autodl-tmp/data/training_log_DCLSM.bin', 'wb') as f:
             pickle.dump(history.history, f)
-        self.model.save("./autodl-tmp/data/model_resnet_singleobj.h5")
+        self.model.save("./autodl-tmp/data/model_resnet_singleobj.h5") #最后将训练好的模型保存在data/model_resnet_singleobj.h5文件下
 
-    def predict(self, X):
+    #定义预测函数
+    def predict(self, X): 
         return self.model.predict(X)
-
+    
+    #定义模型加载方法
     def load_model(self, model_path):
         return load_model(model_path, custom_objects=self.custom_objs)
