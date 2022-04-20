@@ -1,3 +1,6 @@
+############ 用预训练好的ResNet18提取训练集和测试集上的特征和标签并保存在data/features和data/labels相应文件夹下 ################
+
+
 import numpy as np
 import torch
 import torchvision.models as models
