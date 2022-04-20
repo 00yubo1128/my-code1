@@ -12,7 +12,7 @@ model.load_state_dict(torch.load(pthfile))#将权重加载进模型
 #print(model)
 model=torch.nn.Sequential(*(list(model.children())[:-2]))#去掉模型的最后两层：平均池化层和全连接层
 #print(new_model)
-#model=torch.load('./autodl-tmp/ResNet18.pt') #当模型保存后下次使用直接加载模型即可，不需再执行上面几行代码
+#model=torch.load('./autodl-tmp/ResNet18.pt') #将模型保存后下次使用时直接加载模型即可，不需再执行上面几行代码
 
 torch.save(model,'./autodl-tmp/ResNet18.pt')#模型架构和权重保存，以便下次直接使用
 torch.save(model.state_dict(),'./autodl-tmp/ResNet18_weights.pt')#只保存模型的权重
