@@ -1,3 +1,6 @@
+############# 在测试数据集上测试的代码 ###################
+
+
 from pascalvoc_util import PascalVOC
 from localizer import Localizer
 from collections import defaultdict
