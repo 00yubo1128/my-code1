@@ -1,3 +1,6 @@
+############ 生成小批量数据 #################
+
+
 from pascalvoc_util import PascalVOC
 import config as cfg
 
