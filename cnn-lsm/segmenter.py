@@ -9,12 +9,14 @@ import op
 from skimage import color
 from scipy.ndimage.filters import gaussian_gradient_magnitude
 
+#默认初始轮廓为整张图像的边界
 def default_phi(x):
     phi = np.ones(x.shape[:2])
     phi[5:-5, 5:-5] = -1.
     return phi
 
 
+#由预测目标边界框构造相应的初始水平集函数phi
 def phi_from_bbox(img, bbox):
     xmin, ymin, xmax, ymax = bbox
     h, w = img.shape[:2]
@@ -30,10 +32,12 @@ def phi_from_bbox(img, bbox):
     return phi
 
 
+#边缘指示函数g
 def stopping_fun(x, alpha):
     return 1. / (1. + alpha * op.norm(op.grad(x))**2)
 
 
+#GAC分割模型，返回预测分割蒙版
 def levelset_segment(img, phi=None, dt=1, v=1, sigma=1, alpha=1, n_iter=80, print_after=None):
     img_ori = img.copy()
     img = color.rgb2gray(img)
@@ -51,9 +55,9 @@ def levelset_segment(img, phi=None, dt=1, v=1, sigma=1, alpha=1, n_iter=80, prin
         dphi_norm = op.norm(dphi)
         kappa = op.curvature(phi)
 
-        smoothing = g * kappa * dphi_norm
-        balloon = g * dphi_norm * v
-        attachment = op.dot(dphi, dg)
+        smoothing = g * kappa * dphi_norm #平滑项
+        balloon = g * dphi_norm * v #气球力
+        attachment = op.dot(dphi, dg) #“吸引”力
 
         dphi_t = smoothing + balloon + attachment
 
