@@ -1,3 +1,6 @@
+################ CNN网络训练 ###############3
+
+
 from keras.models import load_model
 from keras.optimizers import SGD, Adam
 from skimage.io import imshow
