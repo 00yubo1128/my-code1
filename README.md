@@ -4,7 +4,8 @@ The code for my paper: Research on Image Segmentation Method Based on Level Set 
 ### Prerequisite
 
 1. Pascal VOC 2012 dataset, download from: <http://host.robots.ox.ac.uk/pascal/VOC/voc2012/#devkit>
-2. Pre-trained models and VGG features; [download from here](https://drive.google.com/open?id=0BzFf_WMmDYN8dUdYZE9iMEZXS0k), then put it in the main project directory
+2. Pre-trained ResNet18 model: download from https://download.pytorch.org/models/resnet18-5c106cde.pth, then put it in the main directory.
+3. CNN model that has been trained: download from 
 
 ### Setup
 
